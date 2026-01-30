@@ -26,8 +26,60 @@
     "supabase",
     "memory"
   ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-tool-use.js \"$CLAUDE_FILE_PATH\" || true"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
-    "allow": [],
+    "allow": [
+      "npm run build",
+      "npm run build:*",
+      "npm run test",
+      "npm run test:*",
+      "npm run lint",
+      "npm run lint:*",
+      "npm run format",
+      "npm run dev",
+      "npx prettier --write *",
+      "npx tsc --noEmit",
+      "pnpm run build",
+      "pnpm run test",
+      "pnpm run lint",
+      "yarn build",
+      "yarn test",
+      "yarn lint",
+      "bun run build",
+      "bun run build:*",
+      "bun run test",
+      "bun run test:*",
+      "bun run lint",
+      "python -m pytest *",
+      "python -m black *",
+      "python -m ruff *",
+      "go test *",
+      "go build *",
+      "go run *",
+      "git status",
+      "git diff *",
+      "git log *",
+      "git branch *",
+      "git add *",
+      "git commit *",
+      "git push *",
+      "git pull",
+      "git fetch",
+      "gh pr *",
+      "gh issue *"
+    ],
     "deny": []
   },
   "settings": {

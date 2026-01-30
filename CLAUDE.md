@@ -74,6 +74,7 @@ go run .             # Run
 - `/tdd` - Start TDD workflow (RED → GREEN → REFACTOR)
 - `/review` - Request code review for current changes
 - `/ship` - Validate changes and prepare for merge
+- `/commit-push-pr` - Commit, push, and create PR in one flow (Boris's most-used command)
 
 ## Agent Delegation
 
@@ -84,6 +85,8 @@ For complex tasks, delegate to specialized agents:
 | `planner` | Multi-step tasks, breaking down features |
 | `code-reviewer` | Quality and security review |
 | `tdd-guide` | Test-driven development guidance |
+| `code-simplifier` | Post-completion code refinement |
+| `verify-app` | Comprehensive E2E verification (2-3x quality improvement) |
 
 ## Git Workflow (Trunk-Based)
 
@@ -118,3 +121,22 @@ Pre-configured MCPs (enable as needed in `.claude/settings.json`):
 - **GitHub:** PR and issue management
 - **Supabase:** Database operations
 - **Memory:** Session persistence across conversations
+
+## Team Learnings & Mistakes
+
+<!--
+Boris Cherny: "Each team maintains a CLAUDE.md in git to document mistakes,
+so Claude can improve over time."
+
+Add mistakes Claude has made and how to avoid them. Update this section
+when you notice recurring issues. Use @.claude tag on PRs to capture learnings.
+-->
+
+### Patterns to Avoid
+<!-- Add patterns that have caused issues -->
+
+### Lessons Learned
+<!-- Add learnings from past mistakes -->
+
+### Style Conventions
+<!-- Add project-specific style rules discovered over time -->

@@ -22,12 +22,13 @@ node scripts/setup.js --language=node --name=my-app
 
 | Component | Description |
 |-----------|-------------|
-| **Agents** | Planner, code-reviewer, TDD guide |
-| **Commands** | `/plan`, `/tdd`, `/review`, `/ship` |
+| **Agents** | Planner, code-reviewer, TDD guide, code-simplifier, verify-app |
+| **Commands** | `/plan`, `/tdd`, `/review`, `/ship`, `/commit-push-pr` |
 | **Skills** | Trunk-based dev, TDD workflow |
 | **Rules** | Security, coding style, git workflow |
-| **Hooks** | Session persistence |
+| **Hooks** | Session persistence, PostToolUse code formatting |
 | **MCPs** | GitHub, Supabase, Memory (disabled by default) |
+| **Permissions** | Pre-approved safe commands (build, test, lint, git) |
 
 ### GitHub Workflows (`.github/workflows/`)
 
@@ -54,6 +55,17 @@ Update the mode in `CLAUDE.md` as your project matures.
 | `/tdd` | Start test-driven development workflow |
 | `/review` | Request code review for changes |
 | `/ship` | Validate and prepare for merge |
+| `/commit-push-pr` | Commit, push, and create PR in one flow |
+
+## Agents
+
+| Agent | Description |
+|-------|-------------|
+| `planner` | Break down complex tasks into steps |
+| `code-reviewer` | Quality and security review |
+| `tdd-guide` | Test-driven development guidance |
+| `code-simplifier` | Post-completion code refinement |
+| `verify-app` | Comprehensive E2E verification |
 
 ## Enabling MCPs
 
@@ -89,6 +101,17 @@ When updates are detected, a GitHub issue is created automatically.
 2. **Agents** - Add domain-specific agents in `.claude/agents/`
 3. **Rules** - Add project-specific rules in `.claude/rules/`
 4. **MCPs** - Enable/add integrations in `.claude/settings.json`
+
+## Boris Cherny's Recommendations
+
+This template incorporates best practices from [Boris Cherny](https://x.com/bcherny/status/2007179832300581177), the creator of Claude Code:
+
+- **Plan Mode First** - Start sessions in Plan mode, iterate until plan is solid
+- **Verification** - Give Claude ways to verify work (2-3x quality improvement)
+- **PostToolUse Hooks** - Auto-format code after edits to prevent CI failures
+- **Permission Patterns** - Pre-approve safe commands to reduce prompts
+- **Mistake Documentation** - Track learnings in CLAUDE.md for continuous improvement
+- **`/commit-push-pr`** - His most-used command (dozens of times daily)
 
 ## License
 
