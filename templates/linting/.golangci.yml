@@ -1,0 +1,164 @@
+# golangci-lint Configuration
+# The standard Go linter aggregator (100+ linters)
+#
+# Install: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+# Run: golangci-lint run
+
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+  build-tags: []
+  skip-dirs:
+    - vendor
+    - third_party
+    - testdata
+  skip-files:
+    - ".*_test.go$"
+    - "mock_*.go"
+
+output:
+  formats:
+    - format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters:
+  enable:
+    # Default linters
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+    # Additional recommended
+    - bodyclose        # Check HTTP response body is closed
+    - dogsled          # Check for too many blank identifiers
+    - dupl             # Duplicate code detection
+    - errorlint        # Error wrapping issues
+    - exhaustive       # Check enum switch exhaustiveness
+    - exportloopref    # Check for loop variable capture
+    - funlen           # Function length limit
+    - gocognit         # Cognitive complexity
+    - goconst          # Find repeated strings
+    - gocritic         # Various checks
+    - gocyclo          # Cyclomatic complexity
+    - godot            # Check comment periods
+    - gofmt            # Check formatting
+    - goimports        # Check imports
+    - gosec            # Security checks
+    - misspell         # Spell checking
+    - nakedret         # Naked returns
+    - nestif           # Nested if depth
+    - nilerr           # nil error checks
+    - noctx            # HTTP request context
+    - nolintlint       # nolint directive issues
+    - prealloc         # Slice preallocation
+    - predeclared      # Shadowing predeclared identifiers
+    - revive           # Fast, configurable linter
+    - rowserrcheck     # sql.Rows.Err() check
+    - sqlclosecheck    # sql.Rows.Close() check
+    - stylecheck       # Style checks
+    - tparallel        # Test parallelism
+    - unconvert        # Unnecessary conversions
+    - unparam          # Unused parameters
+    - whitespace       # Whitespace issues
+
+  disable:
+    - gochecknoglobals # Too strict for most projects
+    - gochecknoinits   # Inits are sometimes needed
+    - wsl              # Too opinionated
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+
+  funlen:
+    lines: 100
+    statements: 50
+
+  gocognit:
+    min-complexity: 20
+
+  gocyclo:
+    min-complexity: 15
+
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment  # Too noisy
+
+  gosec:
+    excludes:
+      - G104  # Unhandled errors (caught by errcheck)
+    config:
+      global:
+        audit: true
+
+  misspell:
+    locale: US
+
+  nestif:
+    min-complexity: 4
+
+  revive:
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      - name: unused-parameter
+      - name: unreachable-code
+      - name: redefines-builtin-id
+
+  stylecheck:
+    checks:
+      - all
+      - -ST1000  # Package comments
+      - -ST1003  # CamelCase naming
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests
+    - path: _test\.go
+      linters:
+        - funlen
+        - dupl
+        - gosec
+        - gocognit
+
+    # Ignore long lines in generated files
+    - path: ".*\\.gen\\.go"
+      linters:
+        - lll
+
+  max-issues-per-linter: 50
+  max-same-issues: 3
+  new: false
+
+severity:
+  default-severity: warning
+  rules:
+    - linters:
+        - gosec
+      severity: error

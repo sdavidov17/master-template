@@ -99,9 +99,27 @@ Update the mode in `CLAUDE.md` as your project matures.
 | `quality-engineering` | Testing pyramid, mutation testing, a11y |
 | `agentic-testing` | Testing LLM-based applications |
 
-## Enabling MCPs
+## MCP Integrations
 
-MCPs are pre-configured but disabled by default. To enable:
+MCPs (Model Context Protocol servers) are pre-configured but disabled by default.
+
+### Available MCPs
+
+| MCP | Purpose | Required Env Vars |
+|-----|---------|-------------------|
+| **github** | PR/issue management, code search | `GITHUB_TOKEN` |
+| **supabase** | Database operations | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` |
+| **memory** | Session persistence | None |
+| **postgres** | Direct PostgreSQL access | `DATABASE_URL` |
+| **sqlite** | Local database for dev/testing | `SQLITE_DB_PATH` |
+| **filesystem** | Enhanced file operations | `PROJECT_ROOT` (optional) |
+| **brave-search** | Web search integration | `BRAVE_API_KEY` |
+| **fetch** | HTTP requests to APIs | None |
+| **puppeteer** | Browser automation, E2E testing | None |
+| **sentry** | Error tracking | `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` |
+| **slack** | Team notifications | `SLACK_BOT_TOKEN` |
+
+### Enabling MCPs
 
 1. Edit `.claude/settings.json`
 2. Remove the MCP name from `disabledMcpServers` array
@@ -115,6 +133,68 @@ MCPs are pre-configured but disabled by default. To enable:
     "memory"
   ]
 }
+```
+
+### Recommended MCPs by Use Case
+
+| Use Case | Enable These MCPs |
+|----------|-------------------|
+| **Web Development** | github, fetch, puppeteer |
+| **Backend/API** | github, postgres or supabase, sentry |
+| **Full Stack** | github, postgres, fetch, puppeteer, sentry |
+| **Research/Analysis** | brave-search, fetch |
+| **Team Projects** | github, slack, memory |
+
+## Linting Tools
+
+Modern linting configurations are included in `templates/linting/`.
+
+### Recommended Tools (2025-2026)
+
+| Language | Tool | Why |
+|----------|------|-----|
+| **TypeScript** | **Biome** | 10-100x faster than ESLint (Rust-based), replaces linting + formatting |
+| **TypeScript** | **ESLint 9+** | Standard with most plugins, use if you need specific plugins |
+| **Python** | **Ruff** | 10-100x faster than Flake8 (Rust-based), replaces 10+ tools |
+| **Go** | **golangci-lint** | Aggregates 100+ linters, de facto standard |
+
+### Configuration Files
+
+| File | Language | Description |
+|------|----------|-------------|
+| `templates/linting/biome.json` | TypeScript/JS | Biome linter + formatter config |
+| `templates/linting/eslint.config.mjs` | TypeScript/JS | ESLint 9+ flat config |
+| `templates/linting/ruff.toml` | Python | Ruff linter + formatter config |
+| `templates/linting/.golangci.yml` | Go | golangci-lint config |
+
+### Quick Setup
+
+**TypeScript (Biome - Recommended):**
+```bash
+npm install -D @biomejs/biome
+cp templates/linting/biome.json ./biome.json
+npx biome check --write .
+```
+
+**TypeScript (ESLint):**
+```bash
+npm install -D eslint @eslint/js typescript-eslint eslint-plugin-security
+cp templates/linting/eslint.config.mjs ./eslint.config.mjs
+npx eslint .
+```
+
+**Python:**
+```bash
+pip install ruff
+cp templates/linting/ruff.toml ./ruff.toml
+ruff check . && ruff format .
+```
+
+**Go:**
+```bash
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+cp templates/linting/.golangci.yml ./.golangci.yml
+golangci-lint run
 ```
 
 ## Daily Update Checks
@@ -198,7 +278,8 @@ master-template/
 │   ├── logging/          # Structured logging
 │   ├── health/           # Health check endpoints
 │   ├── testing/          # Contract, mutation, a11y tests
-│   └── agentic/          # LLM observability & testing
+│   ├── agentic/          # LLM observability & testing
+│   └── linting/          # Biome, ESLint, Ruff, golangci-lint
 ├── scripts/
 │   └── setup.js          # Project initialization
 ├── .pre-commit-config.yaml
