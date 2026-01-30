@@ -1,0 +1,94 @@
+# Claude Assistant - Interactive @claude with Write Access
+# Allows Claude to make code changes when requested via @claude
+#
+# This is a separate workflow with elevated permissions
+# for when you want Claude to actually implement changes.
+#
+# Usage:
+# - "@claude please fix the TypeScript errors"
+# - "@claude implement the suggested changes"
+# - "@claude add tests for the new function"
+#
+# Security: Only runs on PRs from trusted sources
+
+name: Claude Assistant
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+# Only allow one Claude run per PR at a time
+concurrency:
+  group: claude-assistant-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write          # Can push commits
+  pull-requests: write     # Can comment on PRs
+  issues: write            # Can comment on issues
+
+jobs:
+  assist:
+    name: Claude Assistant
+    runs-on: ubuntu-latest
+
+    # Only run if:
+    # 1. Comment contains @claude
+    # 2. Commenter has write access (or is a collaborator)
+    if: |
+      contains(github.event.comment.body, '@claude') &&
+      (github.event.comment.author_association == 'OWNER' ||
+       github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'COLLABORATOR')
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Use a token that can push
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.issue.pull_request && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "Claude"
+          git config user.email "claude@anthropic.com"
+
+      - name: Claude Assistant
+        uses: anthropics/claude-code-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          trigger-phrase: "@claude"
+
+          # Allow Claude to make changes
+          allowed-tools: |
+            Read
+            Edit
+            Write
+            Glob
+            Grep
+            Bash(npm install)
+            Bash(npm run build)
+            Bash(npm run build:*)
+            Bash(npm run lint)
+            Bash(npm run lint:*)
+            Bash(npm run lint --fix)
+            Bash(npm run format)
+            Bash(npm run test)
+            Bash(npm run test:*)
+            Bash(npx prettier --write *)
+            Bash(npx biome check --write *)
+            Bash(python -m pytest *)
+            Bash(python -m ruff check --fix *)
+            Bash(python -m black *)
+            Bash(go test ./...)
+            Bash(go build ./...)
+            Bash(golangci-lint run --fix)
+
+          # Commit changes if any were made
+          commit-changes: true
+          commit-message: "Apply changes requested via @claude"

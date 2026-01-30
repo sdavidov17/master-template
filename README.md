@@ -34,6 +34,8 @@ node scripts/setup.js --language=node --name=my-app
 
 - **ci.yml** - Multi-language CI with coverage gates (Node, Python, Go)
 - **security.yml** - Security scanning (SAST, SCA, secrets, containers, IaC)
+- **claude-code-review.yml** - Automatic PR reviews by Claude + @claude mentions
+- **claude-assistant.yml** - Interactive @claude with write access (fix/implement)
 - **update-check.yml** - Daily check for upstream template updates
 
 ### Security & Quality
@@ -197,6 +199,67 @@ cp templates/linting/.golangci.yml ./.golangci.yml
 golangci-lint run
 ```
 
+## Claude GitHub Integration
+
+Automatic code review and interactive @claude support via [Claude Code Action](https://github.com/anthropics/claude-code-action).
+
+### Setup
+
+**Option 1: Via Claude Code (Recommended)**
+```bash
+claude
+/install-github-app
+```
+
+**Option 2: Manual Setup**
+1. Add `ANTHROPIC_API_KEY` to repository secrets (Settings → Secrets → Actions)
+2. Workflows are already configured in `.github/workflows/`
+
+### Features
+
+| Workflow | Trigger | What it Does |
+|----------|---------|--------------|
+| **claude-code-review.yml** | New PR | Automatic code review for quality, bugs, security |
+| **claude-code-review.yml** | `@claude` comment | Responds to questions about the code |
+| **claude-assistant.yml** | `@claude` comment | Makes code changes when requested (write access) |
+
+### Usage Examples
+
+**Automatic PR Review:**
+- Every new PR gets an automatic code review
+- Reviews focus on: code quality, bugs, security, tests, docs
+
+**Ask Questions:**
+```
+@claude what does this function do?
+@claude is there a security risk here?
+@claude how can I improve the performance?
+```
+
+**Request Changes (claude-assistant.yml):**
+```
+@claude please fix the TypeScript errors
+@claude add input validation to this function
+@claude implement the suggested changes
+@claude add tests for the new endpoint
+```
+
+### Security Notes
+
+- `claude-code-review.yml`: Read-only, can only comment
+- `claude-assistant.yml`: Write access, but restricted to:
+  - Only collaborators/members can trigger
+  - Limited allowed commands (build, test, lint, format)
+  - All changes are committed with clear attribution
+
+### Alternative: Cloud Providers
+
+Instead of Anthropic API, you can use:
+- **AWS Bedrock**: Set `aws-access-key-id`, `aws-secret-access-key`, `aws-region`
+- **Google Vertex AI**: Set `gcp-project-id`, `gcp-region`, `gcp-credentials`
+
+See [cloud-providers.md](https://github.com/anthropics/claude-code-action/blob/main/docs/cloud-providers.md) for details.
+
 ## Daily Update Checks
 
 The `update-check.yml` workflow runs daily to check for updates from:
@@ -270,6 +333,8 @@ master-template/
 │   ├── workflows/        # CI/CD pipelines
 │   │   ├── ci.yml        # Main CI with coverage gates
 │   │   ├── security.yml  # Security scanning
+│   │   ├── claude-code-review.yml   # Auto PR review + @claude
+│   │   ├── claude-assistant.yml     # @claude with write access
 │   │   └── update-check.yml
 │   ├── dependabot.yml    # Dependency updates
 │   └── pull_request_template.md

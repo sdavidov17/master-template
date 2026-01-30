@@ -1,0 +1,147 @@
+# Claude Code Review
+# Automatic code review on PRs and @claude mention support
+#
+# Setup:
+# 1. Add ANTHROPIC_API_KEY to repository secrets
+# 2. Or use /install-github-app in Claude Code terminal
+#
+# Usage:
+# - Automatic review on new PRs
+# - Comment "@claude review this" for on-demand review
+# - Comment "@claude fix the linting errors" for code changes
+#
+# Docs: https://github.com/anthropics/claude-code-action
+
+name: Claude Code Review
+
+on:
+  # Automatic PR review
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  # @claude mentions in comments
+  issue_comment:
+    types: [created]
+
+  # @claude mentions in PR review comments
+  pull_request_review_comment:
+    types: [created]
+
+# Restrict to PRs only (not issues)
+# Remove this if you want Claude to respond to issue comments too
+concurrency:
+  group: claude-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Automatic code review on new PRs
+  review:
+    name: Code Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Review this pull request for:
+            1. Code quality and best practices
+            2. Potential bugs or edge cases
+            3. Security vulnerabilities (OWASP Top 10)
+            4. Test coverage gaps
+            5. Documentation needs
+
+            Be constructive and specific. Suggest improvements with code examples.
+            Focus on the most important issues first.
+
+          # Optional: Customize model
+          # model: claude-sonnet-4-20250514
+
+          # Optional: Add allowed tools for Claude
+          # allowed-tools: |
+          #   Bash(npm run lint:*)
+          #   Bash(npm run test:*)
+
+  # Handle @claude mentions in comments
+  mention:
+    name: Handle @claude Mention
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') &&
+      contains(github.event.comment.body, '@claude')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Response
+        uses: anthropics/claude-code-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          trigger-phrase: "@claude"
+
+          # Allow Claude to make changes when requested
+          # Uncomment for write access:
+          # allowed-tools: |
+          #   Edit
+          #   Write
+          #   Bash(npm run lint --fix)
+          #   Bash(npm run format)
+
+  # Optional: Security-focused review
+  security-review:
+    name: Security Review
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (contains(github.event.pull_request.title, 'security') ||
+       contains(github.event.pull_request.title, 'auth') ||
+       contains(github.event.pull_request.labels.*.name, 'security'))
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Security Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Perform a security-focused review of this PR:
+
+            1. **Authentication/Authorization**
+               - Are auth checks properly implemented?
+               - Any privilege escalation risks?
+
+            2. **Input Validation**
+               - Is all user input validated?
+               - SQL injection, XSS, command injection risks?
+
+            3. **Secrets & Credentials**
+               - Any hardcoded secrets?
+               - Proper use of environment variables?
+
+            4. **Data Protection**
+               - Sensitive data properly handled?
+               - Encryption used where needed?
+
+            5. **Dependencies**
+               - Any known vulnerable packages?
+
+            Flag any CRITICAL issues prominently.
