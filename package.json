@@ -1,0 +1,24 @@
+{
+  "name": "master-template",
+  "version": "1.0.0",
+  "description": "Bootstrap template for Claude Code projects with trunk-based development and DevOps best practices",
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "update-check": "node scripts/update-check.js",
+    "test": "echo \"Configure test runner for your language\" && exit 0",
+    "lint": "echo \"Configure linter for your language\" && exit 0",
+    "build": "echo \"Configure build for your language\" && exit 0"
+  },
+  "keywords": [
+    "claude-code",
+    "template",
+    "trunk-based-development",
+    "devops"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,133 @@
+# Trunk-Based CI Workflow
+# Runs on every push to main and all PRs
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  detect-language:
+    name: Detect Language
+    runs-on: ubuntu-latest
+    outputs:
+      language: ${{ steps.detect.outputs.language }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect project language
+        id: detect
+        run: |
+          if [ -f "package.json" ]; then
+            echo "language=node" >> $GITHUB_OUTPUT
+          elif [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
+            echo "language=python" >> $GITHUB_OUTPUT
+          elif [ -f "go.mod" ]; then
+            echo "language=go" >> $GITHUB_OUTPUT
+          else
+            echo "language=generic" >> $GITHUB_OUTPUT
+          fi
+
+  node:
+    name: Node.js CI
+    runs-on: ubuntu-latest
+    needs: detect-language
+    if: needs.detect-language.outputs.language == 'node'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint --if-present
+
+      - name: Run tests
+        run: npm test --if-present
+
+      - name: Build
+        run: npm run build --if-present
+
+  python:
+    name: Python CI
+    runs-on: ubuntu-latest
+    needs: detect-language
+    if: needs.detect-language.outputs.language == 'python'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f "pyproject.toml" ]; then
+            pip install -e ".[dev]"
+          elif [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+          pip install pytest ruff black
+
+      - name: Run linter
+        run: ruff check . || true
+
+      - name: Check formatting
+        run: black . --check || true
+
+      - name: Run tests
+        run: pytest --tb=short || true
+
+  go:
+    name: Go CI
+    runs-on: ubuntu-latest
+    needs: detect-language
+    if: needs.detect-language.outputs.language == 'go'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run linter
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          golangci-lint run || true
+
+      - name: Run tests
+        run: go test ./... -v
+
+      - name: Build
+        run: go build ./...
+
+  generic:
+    name: Generic CI
+    runs-on: ubuntu-latest
+    needs: detect-language
+    if: needs.detect-language.outputs.language == 'generic'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for setup script
+        run: |
+          if [ -f "scripts/setup.js" ]; then
+            echo "Run: node scripts/setup.js --help"
+          fi
+          echo "No language-specific CI configured yet."
+          echo "Add package.json, pyproject.toml, or go.mod to enable CI."

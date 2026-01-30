@@ -1,0 +1,38 @@
+{
+  "$schema": "https://claude.ai/code/settings-schema.json",
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server"],
+      "env": {
+        "SUPABASE_URL": "${SUPABASE_URL}",
+        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}"
+      }
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    }
+  },
+  "disabledMcpServers": [
+    "github",
+    "supabase",
+    "memory"
+  ],
+  "permissions": {
+    "allow": [],
+    "deny": []
+  },
+  "settings": {
+    "model": "claude-sonnet-4-20250514",
+    "customInstructions": "",
+    "autoApprove": []
+  }
+}
