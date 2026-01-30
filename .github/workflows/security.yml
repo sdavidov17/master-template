@@ -36,7 +36,7 @@ jobs:
           generateSarif: true
 
       - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: semgrep.sarif
@@ -59,7 +59,7 @@ jobs:
           vuln-type: 'library'
 
       - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -138,7 +138,7 @@ jobs:
 
       - name: Upload container scan results
         if: steps.check-dockerfile.outputs.exists == 'true'
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-container.sarif'
 
@@ -206,7 +206,7 @@ jobs:
 
       - name: Upload Checkov results
         if: steps.check-iac.outputs.exists == 'true'
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: checkov.sarif
 
