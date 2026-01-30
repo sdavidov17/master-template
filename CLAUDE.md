@@ -75,6 +75,9 @@ go run .             # Run
 - `/review` - Request code review for current changes
 - `/ship` - Validate changes and prepare for merge
 - `/commit-push-pr` - Commit, push, and create PR in one flow (Boris's most-used command)
+- `/security-scan` - Run comprehensive security scanning (SAST, SCA, secrets)
+- `/test-coverage` - Run tests with coverage analysis and enforcement
+- `/accessibility` - Run accessibility testing against WCAG 2.1 AA
 
 ## Agent Delegation
 
@@ -87,6 +90,19 @@ For complex tasks, delegate to specialized agents:
 | `tdd-guide` | Test-driven development guidance |
 | `code-simplifier` | Post-completion code refinement |
 | `verify-app` | Comprehensive E2E verification (2-3x quality improvement) |
+| `llm-reviewer` | Validate LLM outputs for safety and accuracy |
+
+## Available Skills
+
+Skills provide domain-specific guidance:
+
+| Skill | Description |
+|-------|-------------|
+| `trunk-based-dev` | Trunk-based development workflow |
+| `tdd-workflow` | Test-driven development practices |
+| `sre-practices` | SLOs, incident response, runbooks |
+| `quality-engineering` | Testing pyramid, mutation testing, a11y |
+| `agentic-testing` | Testing LLM-based applications |
 
 ## Git Workflow (Trunk-Based)
 
@@ -105,6 +121,12 @@ src/                 # Source code
   types/             # Type definitions
 tests/               # Test files mirror src/ structure
 scripts/             # Build and automation scripts
+templates/           # Production-ready code templates
+  observability/     # OpenTelemetry setup (Node, Python, Go)
+  logging/           # Structured logging
+  health/            # Health check endpoints
+  testing/           # Contract testing, mutation testing, a11y
+  agentic/           # LLM tracing, agent testing, cost tracking
 ```
 
 ## Environment Variables
@@ -114,6 +136,22 @@ Required variables should be documented in `.env.example`:
 DATABASE_URL=        # Database connection string
 API_KEY=             # External API key
 ```
+
+## Security & Quality Gates
+
+### Pre-commit Hooks
+Install pre-commit hooks to catch issues early:
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+Hooks include: Gitleaks (secrets), detect-secrets, Bandit (Python), Checkov (IaC)
+
+### CI/CD Quality Gates
+- **Coverage threshold:** 80% (Growth mode), configurable in ci.yml
+- **Security scanning:** SAST (Semgrep), SCA (Trivy), secrets (Gitleaks)
+- **Automated dependency updates:** Dependabot configured
 
 ## MCP Integrations
 

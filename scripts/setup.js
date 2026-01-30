@@ -11,6 +11,9 @@
  *   node scripts/setup.js --language=node
  *   node scripts/setup.js --language=python
  *   node scripts/setup.js --language=go
+ *   node scripts/setup.js --with-observability
+ *   node scripts/setup.js --with-testing
+ *   node scripts/setup.js --with-agentic
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'fs';
@@ -337,12 +340,168 @@ async function main() {
   createEnvExample();
   updateClaudeMd(projectName, language);
 
+  // Optional scaffolding
+  if (options['with-observability']) {
+    await scaffoldObservability(language);
+  }
+
+  if (options['with-testing']) {
+    await scaffoldTesting(language);
+  }
+
+  if (options['with-agentic']) {
+    await scaffoldAgentic(language);
+  }
+
+  // Install pre-commit hooks
+  console.log('\n🔒 Setting up pre-commit hooks...');
+  console.log('Run: pip install pre-commit && pre-commit install');
+
   console.log('\n✨ Setup complete!\n');
   console.log('Next steps:');
   console.log('1. Review and customize CLAUDE.md');
   console.log('2. Enable MCPs in .claude/settings.json as needed');
-  console.log('3. Run your first /plan or /tdd command');
+  console.log('3. Install pre-commit hooks: pip install pre-commit && pre-commit install');
+  console.log('4. Run your first /plan or /tdd command');
   console.log('');
+  console.log('Optional scaffolding (run setup again with flags):');
+  console.log('  --with-observability  Add OpenTelemetry and structured logging');
+  console.log('  --with-testing        Add contract testing and mutation testing');
+  console.log('  --with-agentic        Add LLM tracing and agent testing');
+  console.log('');
+}
+
+/**
+ * Scaffold observability infrastructure
+ */
+async function scaffoldObservability(language) {
+  console.log('\n📊 Scaffolding observability...\n');
+
+  mkdirSync(join(PROJECT_ROOT, 'src', 'lib'), { recursive: true });
+
+  const templateMap = {
+    node: {
+      otel: 'templates/observability/otel-node.ts',
+      logger: 'templates/logging/logger-node.ts',
+      health: 'templates/health/health-node.ts',
+    },
+    python: {
+      otel: 'templates/observability/otel-python.py',
+      logger: 'templates/logging/logger-python.py',
+      health: 'templates/health/health-python.py',
+    },
+    go: {
+      otel: 'templates/observability/otel-go.go',
+      logger: 'templates/logging/logger-go.go',
+      health: 'templates/health/health-go.go',
+    },
+  };
+
+  const templates = templateMap[language];
+  if (!templates) {
+    console.log('Observability templates not available for this language.');
+    return;
+  }
+
+  // Copy templates
+  for (const [name, src] of Object.entries(templates)) {
+    const srcPath = join(PROJECT_ROOT, src);
+    const ext = language === 'python' ? '.py' : language === 'go' ? '.go' : '.ts';
+    const destPath = join(PROJECT_ROOT, 'src', 'lib', `${name}${ext}`);
+
+    if (existsSync(srcPath)) {
+      copyFileSync(srcPath, destPath);
+      console.log(`✅ Created src/lib/${name}${ext}`);
+    }
+  }
+
+  console.log('\nInstall dependencies:');
+  if (language === 'node') {
+    console.log('npm install @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node pino');
+  } else if (language === 'python') {
+    console.log('pip install opentelemetry-sdk opentelemetry-exporter-otlp structlog');
+  } else if (language === 'go') {
+    console.log('go get go.opentelemetry.io/otel go.opentelemetry.io/otel/sdk');
+  }
+}
+
+/**
+ * Scaffold testing infrastructure
+ */
+async function scaffoldTesting(language) {
+  console.log('\n🧪 Scaffolding testing infrastructure...\n');
+
+  mkdirSync(join(PROJECT_ROOT, 'tests'), { recursive: true });
+
+  // Copy mutation testing config
+  const mutationConfigSrc = join(PROJECT_ROOT, 'templates', 'testing', 'mutation-config.json');
+  if (existsSync(mutationConfigSrc) && language === 'node') {
+    copyFileSync(mutationConfigSrc, join(PROJECT_ROOT, 'stryker.config.json'));
+    console.log('✅ Created stryker.config.json (mutation testing)');
+  }
+
+  // Copy contract testing templates
+  if (language === 'node') {
+    const consumerSrc = join(PROJECT_ROOT, 'templates', 'testing', 'contract-consumer.ts');
+    const providerSrc = join(PROJECT_ROOT, 'templates', 'testing', 'contract-provider.ts');
+
+    if (existsSync(consumerSrc)) {
+      copyFileSync(consumerSrc, join(PROJECT_ROOT, 'tests', 'contract-consumer.test.ts'));
+      console.log('✅ Created tests/contract-consumer.test.ts');
+    }
+    if (existsSync(providerSrc)) {
+      copyFileSync(providerSrc, join(PROJECT_ROOT, 'tests', 'contract-provider.test.ts'));
+      console.log('✅ Created tests/contract-provider.test.ts');
+    }
+
+    // Copy accessibility config
+    const a11ySrc = join(PROJECT_ROOT, 'templates', 'testing', 'a11y-config.ts');
+    if (existsSync(a11ySrc)) {
+      copyFileSync(a11ySrc, join(PROJECT_ROOT, 'tests', 'accessibility.test.ts'));
+      console.log('✅ Created tests/accessibility.test.ts');
+    }
+  }
+
+  console.log('\nInstall dependencies:');
+  if (language === 'node') {
+    console.log('npm install --save-dev @stryker-mutator/core @pact-foundation/pact @axe-core/playwright');
+  } else if (language === 'python') {
+    console.log('pip install mutmut pact-python axe-selenium-python');
+  }
+}
+
+/**
+ * Scaffold agentic infrastructure
+ */
+async function scaffoldAgentic(language) {
+  console.log('\n🤖 Scaffolding agentic infrastructure...\n');
+
+  if (language !== 'node') {
+    console.log('Agentic templates currently only available for Node.js/TypeScript.');
+    return;
+  }
+
+  mkdirSync(join(PROJECT_ROOT, 'src', 'lib', 'agentic'), { recursive: true });
+
+  const templates = [
+    { src: 'templates/agentic/llm-tracing.ts', dest: 'src/lib/agentic/llm-tracing.ts' },
+    { src: 'templates/agentic/agent-testing.ts', dest: 'src/lib/agentic/agent-testing.ts' },
+    { src: 'templates/agentic/prompt-versioning.ts', dest: 'src/lib/agentic/prompt-versioning.ts' },
+    { src: 'templates/agentic/cost-tracking.ts', dest: 'src/lib/agentic/cost-tracking.ts' },
+  ];
+
+  for (const { src, dest } of templates) {
+    const srcPath = join(PROJECT_ROOT, src);
+    const destPath = join(PROJECT_ROOT, dest);
+
+    if (existsSync(srcPath)) {
+      copyFileSync(srcPath, destPath);
+      console.log(`✅ Created ${dest}`);
+    }
+  }
+
+  console.log('\nInstall dependencies:');
+  console.log('npm install openai @opentelemetry/api');
 }
 
 main().catch(console.error);

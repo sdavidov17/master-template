@@ -1,0 +1,114 @@
+{
+  "$schema": "https://stryker-mutator.io/docs/stryker-js/config-file",
+  "_comment": [
+    "Mutation Testing Configuration",
+    "",
+    "Mutation testing evaluates the quality of your tests by introducing",
+    "small changes (mutations) to your code and checking if tests catch them.",
+    "",
+    "Installation:",
+    "  npm install --save-dev @stryker-mutator/core @stryker-mutator/typescript-checker",
+    "  npm install --save-dev @stryker-mutator/vitest-runner  # or jest-runner",
+    "",
+    "Usage:",
+    "  npx stryker run",
+    "",
+    "Mutation Score Targets:",
+    "  - MVP Mode: 60% minimum",
+    "  - Growth Mode: 75% minimum",
+    "  - Scale Mode: 85% minimum"
+  ],
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "checkers": ["typescript"],
+  "tsconfigFile": "tsconfig.json",
+  "mutate": [
+    "src/**/*.ts",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts",
+    "!src/**/*.d.ts",
+    "!src/**/index.ts",
+    "!src/types/**/*.ts"
+  ],
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "coverage",
+    ".stryker-tmp"
+  ],
+  "reporters": [
+    "html",
+    "clear-text",
+    "progress",
+    "dashboard"
+  ],
+  "htmlReporter": {
+    "fileName": "reports/mutation/index.html"
+  },
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 50
+  },
+  "concurrency": 4,
+  "timeoutMS": 60000,
+  "timeoutFactor": 2.5,
+  "disableTypeChecks": false,
+  "cleanTempDir": true,
+  "mutator": {
+    "excludedMutations": [
+      "StringLiteral"
+    ],
+    "plugins": []
+  },
+  "dashboard": {
+    "project": "github.com/your-org/your-repo",
+    "version": "main",
+    "reportType": "full"
+  },
+  "coverageAnalysis": "perTest",
+  "incremental": true,
+  "incrementalFile": ".stryker-incremental.json",
+  "commandRunner": {
+    "command": "npm test"
+  },
+  "vitest": {
+    "configFile": "vitest.config.ts",
+    "dir": "."
+  },
+  "_alternatives": {
+    "_pythonMutmut": {
+      "_comment": [
+        "For Python projects, use mutmut:",
+        "",
+        "Installation: pip install mutmut",
+        "Usage: mutmut run",
+        "Results: mutmut results",
+        "",
+        "Configuration in pyproject.toml:"
+      ],
+      "pyprojectToml": {
+        "[tool.mutmut]": {
+          "paths_to_mutate": "src/",
+          "backup": false,
+          "runner": "python -m pytest -x --tb=no -q",
+          "tests_dir": "tests/",
+          "dict_synonyms": "Struct, NamedTuple"
+        }
+      }
+    },
+    "_goMutation": {
+      "_comment": [
+        "For Go projects, use go-mutesting or gremlins:",
+        "",
+        "go-mutesting:",
+        "  go install github.com/zimmski/go-mutesting/cmd/go-mutesting@latest",
+        "  go-mutesting ./...",
+        "",
+        "gremlins:",
+        "  go install github.com/go-gremlins/gremlins/cmd/gremlins@latest",
+        "  gremlins unleash"
+      ]
+    }
+  }
+}
