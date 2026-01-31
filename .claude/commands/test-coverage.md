@@ -1,3 +1,8 @@
+---
+name: test-coverage
+description: Run tests with coverage analysis and enforce coverage thresholds based on architecture mode.
+---
+
 # /test-coverage Command
 
 Run tests with coverage analysis and enforce coverage thresholds.

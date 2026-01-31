@@ -1,3 +1,9 @@
+---
+name: review
+description: Request a code review for current changes. Checks quality, security, and tests.
+argument-hint: [optional file or feature]
+---
+
 # /review Command
 
 Request a code review for current changes.

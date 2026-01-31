@@ -1,3 +1,8 @@
+---
+name: accessibility
+description: Run accessibility testing against WCAG 2.1 AA and generate compliance reports.
+---
+
 # /accessibility Command
 
 Run accessibility testing and generate compliance reports.

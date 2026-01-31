@@ -1,3 +1,9 @@
+---
+name: commit-push-pr
+description: Commit changes, push to remote, and create a pull request in one flow. Boris Cherny's most-used command.
+argument-hint: [optional PR title]
+---
+
 # /commit-push-pr Command
 
 Commit changes, push to remote, and create a pull request in one flow.

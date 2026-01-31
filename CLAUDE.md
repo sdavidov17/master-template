@@ -70,14 +70,27 @@ go run .             # Run
 
 ## Available Commands
 
+### Workflow Commands
 - `/plan` - Create implementation plan before coding complex features
 - `/tdd` - Start TDD workflow (RED → GREEN → REFACTOR)
 - `/review` - Request code review for current changes
 - `/ship` - Validate changes and prepare for merge
 - `/commit-push-pr` - Commit, push, and create PR in one flow (Boris's most-used command)
+
+### Quality Commands
 - `/security-scan` - Run comprehensive security scanning (SAST, SCA, secrets)
 - `/test-coverage` - Run tests with coverage analysis and enforcement
 - `/accessibility` - Run accessibility testing against WCAG 2.1 AA
+
+### Domain Review Commands
+- `/api-design` - Review API design following REST/tRPC/GraphQL best practices
+- `/code-review` - Thorough code review with project conventions
+- `/security` - Security review following OWASP Top 10 2025
+- `/sre` - Production readiness review (observability, reliability, SLOs)
+- `/devops` - CI/CD pipeline and infrastructure review
+
+### Self-Improvement
+- `/reflect` - Process session learnings and update CLAUDE.md
 
 ## Agent Delegation
 
@@ -120,14 +133,28 @@ src/                 # Source code
   lib/               # Shared utilities
   types/             # Type definitions
 tests/               # Test files mirror src/ structure
+docs/
+  adr/               # Architecture Decision Records
+  diagrams/          # Mermaid diagrams (architecture, ERD, flows)
 scripts/             # Build and automation scripts
 templates/           # Production-ready code templates
+  database/          # Prisma, Drizzle, Alembic schemas
   observability/     # OpenTelemetry setup (Node, Python, Go)
   logging/           # Structured logging
   health/            # Health check endpoints
   testing/           # Contract testing, mutation testing, a11y
   agentic/           # LLM tracing, agent testing, cost tracking
 ```
+
+## Everything as Code
+
+| Category | Location |
+|----------|----------|
+| **Database Schema** | `templates/database/` (Prisma, Drizzle, Alembic) |
+| **Diagrams** | `docs/diagrams/` (Mermaid) |
+| **Decisions** | `docs/adr/` (ADRs) |
+| **CI/CD** | `.github/workflows/` |
+| **Security Guards** | `.claude/scripts/guards/` |
 
 ## Environment Variables
 
@@ -159,6 +186,43 @@ Pre-configured MCPs (enable as needed in `.claude/settings.json`):
 - **GitHub:** PR and issue management
 - **Supabase:** Database operations
 - **Memory:** Session persistence across conversations
+
+## Safety Guardrails
+
+The template includes hooks that protect against common mistakes. See `.claude/HOOKS.md` for details.
+
+### Protected Operations
+| Operation | Protection |
+|-----------|------------|
+| `rm -rf /` or `~` | Blocked |
+| Force push to main | Blocked |
+| Edit `.env` files | Blocked |
+| Hardcoded secrets | Blocked |
+| Production commands | Warning |
+| Test file changes | Warning |
+| Schema/config changes | Warning |
+
+## Self-Learning System
+
+This template implements Boris Cherny's recommendation for continuous improvement.
+
+### How It Works
+1. During sessions, corrections are captured to `.claude/learnings.json`
+2. Run `/reflect` to review and apply learnings
+3. Approved learnings are added to this file
+4. Future sessions benefit from accumulated knowledge
+
+### Capturing Learnings
+Corrections are detected from phrases like:
+- "No, use X instead of Y"
+- "Actually, we prefer..."
+- "The correct approach is..."
+
+### Processing Learnings
+```bash
+/reflect              # Review and apply pending learnings
+/reflect --dry-run    # Preview without updating
+```
 
 ## Team Learnings & Mistakes
 

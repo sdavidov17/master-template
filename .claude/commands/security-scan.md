@@ -1,3 +1,8 @@
+---
+name: security-scan
+description: Run comprehensive security scanning (SAST, SCA, secrets detection) on the codebase.
+---
+
 # /security-scan Command
 
 Run comprehensive security scanning on the codebase.

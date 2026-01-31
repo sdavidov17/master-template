@@ -1,0 +1,6 @@
+{
+  "$schema": "./learnings-schema.json",
+  "description": "Captured learnings from Claude Code sessions for self-improvement",
+  "usage": "Run /reflect to process these learnings and update CLAUDE.md",
+  "learnings": []
+}

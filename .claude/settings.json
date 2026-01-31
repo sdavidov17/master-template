@@ -83,6 +83,42 @@
     "slack"
   ],
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/guards/block_dangerous_rm.sh \"$CLAUDE_BASH_COMMAND\""
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/guards/block_force_push.sh \"$CLAUDE_BASH_COMMAND\""
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/guards/warn_production.sh \"$CLAUDE_BASH_COMMAND\""
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/guards/protect_sensitive_files.sh \"$CLAUDE_FILE_PATH\""
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/guards/warn_test_changes.sh \"$CLAUDE_FILE_PATH\""
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/guards/protect_critical_files.sh \"$CLAUDE_FILE_PATH\""
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
@@ -90,6 +126,25 @@
           {
             "type": "command",
             "command": "node .claude/hooks/post-tool-use.js \"$CLAUDE_FILE_PATH\" || true"
+          },
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_FILE_CONTENT\" | bash .claude/scripts/guards/detect_hardcoded_secrets.sh || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/guards/check_tests_run.sh || true"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/post_commit_reminder.sh || true"
           }
         ]
       }

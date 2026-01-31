@@ -1,3 +1,9 @@
+---
+name: tdd
+description: Start test-driven development workflow (RED → GREEN → REFACTOR) for a feature or bug fix.
+argument-hint: [feature or bug description]
+---
+
 # /tdd Command
 
 Start test-driven development workflow for a feature or bug fix.

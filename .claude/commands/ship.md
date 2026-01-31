@@ -1,3 +1,9 @@
+---
+name: ship
+description: Validate changes and prepare for merge. Runs pre-merge checklist including tests, lint, and review.
+argument-hint: [optional commit message]
+---
+
 # /ship Command
 
 Validate changes and prepare for merge to main branch.

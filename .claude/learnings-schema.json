@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claude Code Learnings",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "usage": {
+      "type": "string"
+    },
+    "learnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["date", "category", "original", "correction"],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the learning was captured (YYYY-MM-DD)"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["style", "pattern", "tool", "architecture", "security", "testing", "workflow"],
+            "description": "Category of the learning"
+          },
+          "original": {
+            "type": "string",
+            "description": "What was originally done or attempted"
+          },
+          "correction": {
+            "type": "string",
+            "description": "The correct approach or preference"
+          },
+          "context": {
+            "type": "string",
+            "description": "Additional context about why this is preferred"
+          },
+          "file": {
+            "type": "string",
+            "description": "File path where this occurred (if applicable)"
+          }
+        }
+      }
+    }
+  }
+}

@@ -26,7 +26,7 @@ node scripts/setup.js --language=node --name=my-app
 | **Commands** | `/plan`, `/tdd`, `/review`, `/ship`, `/commit-push-pr`, `/security-scan`, `/test-coverage`, `/accessibility` |
 | **Skills** | Trunk-based dev, TDD workflow, SRE practices, quality engineering, agentic testing |
 | **Rules** | Security (OWASP 2025), coding style, git workflow, AI guardrails |
-| **Hooks** | Session persistence, PostToolUse code formatting, pre-commit security |
+| **Hooks** | Safety guards (8 scripts), code formatting, session persistence |
 | **MCPs** | GitHub, Supabase, Memory (disabled by default) |
 | **Permissions** | Pre-approved safe commands (build, test, lint, git) |
 
@@ -69,6 +69,7 @@ Update the mode in `CLAUDE.md` as your project matures.
 
 ## Commands
 
+### Workflow
 | Command | Description |
 |---------|-------------|
 | `/plan` | Create implementation plan before coding |
@@ -76,9 +77,23 @@ Update the mode in `CLAUDE.md` as your project matures.
 | `/review` | Request code review for changes |
 | `/ship` | Validate and prepare for merge |
 | `/commit-push-pr` | Commit, push, and create PR in one flow |
+
+### Quality
+| Command | Description |
+|---------|-------------|
 | `/security-scan` | Run SAST, SCA, and secret scanning |
 | `/test-coverage` | Run tests with coverage enforcement |
 | `/accessibility` | Run WCAG 2.1 AA accessibility testing |
+
+### Domain Reviews
+| Command | Description |
+|---------|-------------|
+| `/api-design` | Review API design (REST/tRPC/GraphQL) |
+| `/code-review` | Thorough code review with project conventions |
+| `/security` | Security review (OWASP Top 10 2025) |
+| `/sre` | Production readiness (observability, SLOs) |
+| `/devops` | CI/CD pipeline and infrastructure review |
+| `/reflect` | Process session learnings, update CLAUDE.md |
 
 ## Agents
 
@@ -308,6 +323,46 @@ The security workflow runs automatically on push/PR. It includes:
 5. **Templates** - Copy and customize from `templates/`
 6. **MCPs** - Enable/add integrations in `.claude/settings.json`
 
+## Safety Guardrails
+
+The template includes executable guard scripts that protect against common mistakes.
+
+### Protection Matrix
+
+| Operation | Guard | Action |
+|-----------|-------|--------|
+| `rm -rf /` or `~` | block_dangerous_rm.sh | Block |
+| `git push --force main` | block_force_push.sh | Block |
+| Edit `.env` files | protect_sensitive_files.sh | Block |
+| Hardcoded secrets (AWS, GitHub, Stripe) | detect_hardcoded_secrets.sh | Block |
+| Production commands | warn_production.sh | Warn |
+| Test file changes | warn_test_changes.sh | Warn |
+| Schema/config changes | protect_critical_files.sh | Warn |
+
+Guards are in `.claude/scripts/guards/` and configured in `.claude/settings.json`.
+
+See `.claude/HOOKS.md` for full documentation.
+
+## Self-Learning System
+
+Implements Boris Cherny's recommendation for continuous improvement:
+
+> "Each team maintains a CLAUDE.md in git to document mistakes, so Claude can improve over time."
+
+### How It Works
+
+1. **During sessions**: Corrections are captured to `.claude/learnings.json`
+2. **Run `/reflect`**: Review and process accumulated learnings
+3. **Update CLAUDE.md**: Approved learnings become permanent documentation
+4. **Future sessions**: Claude benefits from accumulated knowledge
+
+### Usage
+
+```bash
+/reflect              # Process and apply learnings
+/reflect --dry-run    # Preview without updating
+```
+
 ## Boris Cherny's Recommendations
 
 This template incorporates best practices from [Boris Cherny](https://x.com/bcherny/status/2007179832300581177), the creator of Claude Code:
@@ -319,6 +374,55 @@ This template incorporates best practices from [Boris Cherny](https://x.com/bche
 - **Mistake Documentation** - Track learnings in CLAUDE.md for continuous improvement
 - **`/commit-push-pr`** - His most-used command (dozens of times daily)
 
+## Everything as Code
+
+This template follows the "Everything as Code" principle.
+
+| Category | Location | What's Included |
+|----------|----------|-----------------|
+| **CI/CD as Code** | `.github/workflows/` | Build, test, deploy pipelines |
+| **Security as Code** | `.claude/scripts/guards/` | Executable safety guardrails |
+| **Config as Code** | `.claude/settings.json` | Claude configuration |
+| **Database as Code** | `templates/database/` | Prisma, Drizzle, Alembic schemas |
+| **Diagrams as Code** | `docs/diagrams/` | Mermaid architecture diagrams |
+| **Decisions as Code** | `docs/adr/` | Architecture Decision Records |
+| **Linting as Code** | `templates/linting/` | Biome, ESLint, Ruff configs |
+| **Observability as Code** | `templates/observability/` | OpenTelemetry setup |
+
+### Architecture Decision Records (ADRs)
+
+Document architectural decisions alongside code:
+
+```bash
+# Create new ADR
+cp docs/adr/0000-template.md docs/adr/0002-use-postgresql.md
+```
+
+See `docs/adr/README.md` for the full guide.
+
+### Database Migrations
+
+Schema templates for common ORMs:
+
+| Tool | Language | Location |
+|------|----------|----------|
+| Prisma | TypeScript | `templates/database/prisma/` |
+| Drizzle | TypeScript | `templates/database/drizzle/` |
+| Alembic | Python | `templates/database/alembic/` |
+| Raw SQL | Any | `templates/database/migrations/` |
+
+### Diagrams as Code
+
+Mermaid diagrams render in GitHub, VS Code, and most markdown viewers:
+
+| Diagram | Purpose |
+|---------|---------|
+| `architecture.md` | System overview |
+| `sequence-auth.md` | Auth flow |
+| `erd.md` | Database schema |
+| `state-order.md` | Order state machine |
+| `c4-context.md` | C4 context diagram |
+
 ## Template Structure
 
 ```
@@ -326,19 +430,30 @@ master-template/
 ├── .claude/
 │   ├── agents/           # AI agent definitions
 │   ├── commands/         # Slash command definitions
-│   ├── hooks/            # Pre/post tool hooks
+│   ├── hooks/            # JavaScript hooks
+│   ├── scripts/guards/   # Safety guard scripts (8 scripts)
 │   ├── rules/            # Always-on guidelines
-│   └── skills/           # Domain-specific knowledge
+│   ├── skills/           # Domain-specific knowledge
+│   ├── learnings.json    # Self-learning storage
+│   └── HOOKS.md          # Hooks documentation
 ├── .github/
 │   ├── workflows/        # CI/CD pipelines
-│   │   ├── ci.yml        # Main CI with coverage gates
-│   │   ├── security.yml  # Security scanning
-│   │   ├── claude-code-review.yml   # Auto PR review + @claude
-│   │   ├── claude-assistant.yml     # @claude with write access
-│   │   └── update-check.yml
 │   ├── dependabot.yml    # Dependency updates
 │   └── pull_request_template.md
+├── docs/
+│   ├── adr/              # Architecture Decision Records
+│   │   ├── 0000-template.md
+│   │   └── 0001-use-adr-for-decisions.md
+│   └── diagrams/         # Mermaid diagrams
+│       ├── architecture.md
+│       ├── sequence-auth.md
+│       ├── erd.md
+│       └── ...
 ├── templates/
+│   ├── database/         # Schema & migration templates
+│   │   ├── prisma/
+│   │   ├── drizzle/
+│   │   └── alembic/
 │   ├── observability/    # OpenTelemetry setup
 │   ├── logging/          # Structured logging
 │   ├── health/           # Health check endpoints
@@ -351,6 +466,36 @@ master-template/
 ├── CLAUDE.md             # Project context for Claude
 └── README.md
 ```
+
+## Optional: BMAD Method Integration
+
+For enterprise-scale projects requiring multi-agent orchestration, you can optionally integrate [BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD).
+
+### When to Consider BMAD
+
+| Use BMAD When | Skip BMAD When |
+|---------------|----------------|
+| 8+ hour features | Quick bug fixes |
+| Multiple stakeholders | Solo projects |
+| Complex architecture | Simple features |
+| Compliance/audit requirements | Prototyping |
+| Enterprise production systems | MVPs |
+
+### Installation
+
+```bash
+# Clone BMAD core
+git clone https://github.com/bmad-code-org/BMAD-METHOD .bmad-core
+
+# Copy agent commands (optional)
+cp -r .bmad-core/agents .claude/commands/bmad/
+```
+
+### Note
+
+BMAD adds significant complexity (100+ files, 2 month learning curve). This template is designed to be lightweight and composable - only add BMAD if you genuinely need enterprise-scale agent orchestration.
+
+See [BMAD Documentation](https://github.com/bmad-code-org/BMAD-METHOD) for details.
 
 ## License
 

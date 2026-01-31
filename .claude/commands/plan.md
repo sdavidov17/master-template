@@ -1,3 +1,9 @@
+---
+name: plan
+description: Create an implementation plan before coding a complex feature. Breaks work into small verifiable tasks.
+argument-hint: [feature description]
+---
+
 # /plan Command
 
 Create an implementation plan before coding a complex feature.
